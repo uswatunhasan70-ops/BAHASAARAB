@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Evaluasi Bahasa Arab</title>
+    <!-- Menggunakan Tailwind CSS via CDN untuk styling cepat dan modern -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts untuk teks Arab yang lebih indah -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        .fade-in { 
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; 
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .arabic-text { 
+            font-family: 'Amiri', serif; 
+            font-size: 1.75rem; 
+            line-height: 2.5rem;
+            direction: rtl;
+        }
+        /* Menghilangkan scrollbar agar terlihat seperti aplikasi native */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen font-sans text-slate-800 flex items-center justify-center p-4">
+
+    <div class="w-full max-w-xl bg-white rounded-2xl shadow-xl overflow-hidden relative">
+        
+        <!-- Header Aplikasi -->
+        <div class="bg-gradient-to-r from-emerald-500 to-teal-500 p-6 text-center shadow-sm">
+            <h1 class="text-2xl md:text-3xl font-bold text-white tracking-wide">Evaluasi Bahasa Arab</h1>
+            <p class="text-emerald-100 mt-1 text-sm md:text-base">Madrasah Ibtidaiyah (MI)</p>
+        </div>
+
+        <!-- Area Konten Dinamis -->
+        <div class="p-6 md:p-8 min-h-[400px] flex flex-col justify-center">
+            
+            <!-- SECTION 1: LOGIN / IDENTITAS -->
+            <div id="section-login" class="fade-in w-full">
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full mb-3">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-700">Identitas Siswa</h2>
+                    <p class="text-sm text-slate-500">Silakan isi data diri sebelum memulai kuis.</p>
+                </div>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Lengkap</label>
+                        <input type="text" id="student-name" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all" placeholder="Contoh: Ahmad Fadil">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">Kelas</label>
+                        <select id="student-class" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all appearance-none">
+                            <option value="" disabled selected>-- Pilih Kelas --</option>
+                            <option value="4A">Kelas 4A</option>
+                            <option value="4B">Kelas 4B</option>
+                            <option value="5A">Kelas 5A</option>
+                            <option value="5B">Kelas 5B</option>
+                            <option value="6A">Kelas 6A</option>
+                            <option value="6B">Kelas 6B</option>
+                        </select>
+                    </div>
+                    
+                    <div id="error-login" class="hidden bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Harap isi nama dan kelas terlebih dahulu!
+                    </div>
+
+                    <button onclick="startApp()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]">
+                        Mulai Mengerjakan
+                    </button>
+                </div>
+            </div>
+
+            <!-- SECTION 2: LOADING -->
+            <div id="section-loading" class="hidden flex flex-col items-center justify-center py-10 fade-in text-center">
+                <div class="relative w-20 h-20 mb-4">
+                    <div class="absolute inset-0 rounded-full border-4 border-slate-100"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin"></div>
+                </div>
+                <h3 class="text-lg font-bold text-slate-700">Menghubungkan ke Database...</h3>
+                <p class="text-slate-500 text-sm mt-2 max-w-xs" id="loading-text">Sedang mengambil soal dari server. Harap tunggu sebentar.</p>
+            </div>
+
+            <!-- SECTION 3: AREA KUIS -->
+            <div id="section-quiz" class="hidden fade-in w-full">
+                <!-- Header Info Kuis -->
+                <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg" id="quiz-progress">Soal 1/10</span>
+                    </div>
+                    <span class="text-sm font-semibold text-slate-500 flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        <span id="student-display">Nama Siswa</span>
+                    </span>
+                </div>
+                
+                <!-- Teks Pertanyaan -->
+                <div class="min-h-[100px] flex items-center justify-center mb-6">
+                    <h3 class="text-xl md:text-2xl font-bold text-slate-800 text-center leading-relaxed" id="question-text">
+                        Pertanyaan akan muncul di sini?
+                    </h3>
+                </div>
+                
+                <!-- Kontainer Pilihan Ganda -->
+                <div class="space-y-3" id="options-container">
+                    <!-- Tombol opsi akan dirender via JS -->
+                </div>
+            </div>
+
+            <!-- SECTION 4: HASIL KUIS -->
+            <div id="section-result" class="hidden fade-in w-full text-center">
+                <!-- Ikon Sukses -->
+                <div class="relative w-24 h-24 mx-auto mb-6">
+                    <div class="absolute inset-0 bg-emerald-100 rounded-full animate-ping opacity-75"></div>
+                    <div class="relative bg-emerald-100 rounded-full w-24 h-24 flex items-center justify-center border-4 border-white shadow-lg">
+                        <svg class="w-12 h-12 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                </div>
+
+                <h2 class="text-2xl md:text-3xl font-bold mb-2 text-slate-800">Alhamdulillah!</h2>
+                <p class="text-slate-500 mb-8">Kuis telah selesai dikerjakan oleh <span id="result-name" class="font-bold text-slate-700"></span>.</p>
+                
+                <!-- Kartu Skor -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-5 rounded-2xl shadow-md text-white">
+                        <p class="text-blue-100 text-sm font-medium mb-1">Nilai Akhir</p>
+                        <p class="text-4xl font-bold" id="result-score">100</p>
+                    </div>
+                    <div class="grid grid-rows-2 gap-2">
+                        <div class="bg-emerald-50 border border-emerald-100 p-3 rounded-xl flex items-center justify-between">
+                            <span class="text-emerald-600 text-sm font-bold">Benar</span>
+                            <span class="bg-emerald-200 text-emerald-700 px-3 py-1 rounded-lg font-bold" id="result-benar">0</span>
+                        </div>
+                        <div class="bg-rose-50 border border-rose-100 p-3 rounded-xl flex items-center justify-between">
+                            <span class="text-rose-600 text-sm font-bold">Salah</span>
+                            <span class="bg-rose-200 text-rose-700 px-3 py-1 rounded-lg font-bold" id="result-salah">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Pengiriman ke Database -->
+                <div id="db-status" class="flex items-center justify-center p-4 mb-6 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Menyimpan hasil ke database guru...
+                </div>
+
+                <button onclick="location.reload()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 px-4 rounded-xl transition duration-200 shadow-md">
+                    Selesai & Kembali
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /** ==============================================================================
+         *  KONFIGURASI UTAMA
+         *  Ganti URL di bawah dengan URL Web App dari Google Apps Script yang Anda buat!
+         *  ============================================================================== */
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxGjhC7u7lok9d3EGx-RI2qA1p14EpRj3yT9Vssa0NX-YXggMqCRuWsvn9f6En1WK4t/exec'; 
+        // -------------------------------------------------------------------------------
+
+        // State Aplikasi
+        let studentData = { name: '', class: '' };
+        let quizQuestions = [];
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let detailedAnswers = []; 
+
+        // FUNGSI: Mengatur Perpindahan Tampilan (Section)
+        function showSection(sectionId) {
+            ['section-login', 'section-loading', 'section-quiz', 'section-result'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+                document.getElementById(id).classList.remove('fade-in');
+            });
+            const activeSection = document.getElementById(sectionId);
+            activeSection.classList.remove('hidden');
+            // Memicu reflow untuk restart animasi
+            void activeSection.offsetWidth; 
+            activeSection.classList.add('fade-in');
+        }
+
+        // FUNGSI: Dimulai saat tombol "Mulai Mengerjakan" diklik
+        async function startApp() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            const classInput = document.getElementById('student-class').value;
+            const errorMsg = document.getElementById('error-login');
+
+            // Validasi Input
+            if (!nameInput || !classInput) {
+                errorMsg.classList.remove('hidden');
+                // Shake animation effect (opsional via JS)
+                errorMsg.animate([{transform: 'translateX(0)'}, {transform: 'translateX(-5px)'}, {transform: 'translateX(5px)'}, {transform: 'translateX(0)'}], {duration: 300});
+                return;
+            }
+
+            // Cek peringatan URL belum diubah
+            if (SCRIPT_URL === 'MASUKKAN_URL_WEB_APP_ANDA_DISINI') {
+                alert("PERINGATAN GURU: Anda belum memasukkan URL Google Apps Script ke dalam kode HTML. Silakan edit file index.html terlebih dahulu.");
+                return;
+            }
+
+            errorMsg.classList.add('hidden');
+            studentData.name = nameInput;
+            studentData.class = classInput;
+            document.getElementById('student-display').innerText = `${nameInput.split(' ')[0]} - ${classInput}`;
+
+            showSection('section-loading');
+            await fetchQuestionsFromDB();
+        }
+
+        // FUNGSI: Request GET ke Apps Script untuk memuat soal
+        async function fetchQuestionsFromDB() {
+            const loadingText = document.getElementById('loading-text');
+            try {
+                // Fetch data dari Google Script
+                const response = await fetch(SCRIPT_URL);
+                const result = await response.json();
+
+                if (result.status === 'success' && result.data.length > 0) {
+                    // Acak urutan soal (Opsional: hapus blok ini jika ingin urutan tetap)
+                    quizQuestions = result.data.sort(() => 0.5 - Math.random());
+                    
+                    startQuiz();
+                } else {
+                    throw new Error("Data soal kosong di spreadsheet.");
+                }
+            } catch (error) {
+                console.error("Gagal mengambil soal:", error);
+                loadingText.innerText = "Koneksi gagal. Pastikan link Apps Script benar atau periksa internet Anda.";
+                loadingText.classList.add('text-red-500', 'font-semibold');
+                // Mengubah warna spinner menjadi merah muda indikasi error
+                document.querySelector('.border-emerald-500').classList.replace('border-emerald-500', 'border-red-500');
+            }
+        }
+
+        // FUNGSI: Reset State dan Mulai Tampilkan Kuis
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            correctCount = 0;
+            wrongCount = 0;
+            detailedAnswers = [];
+            showSection('section-quiz');
+            loadQuestion();
+        }
+
+        // FUNGSI: Merender Pertanyaan dan Opsi ke Layar
+        function loadQuestion() {
+            const q = quizQuestions[currentQuestionIndex];
+            document.getElementById('quiz-progress').innerText = `Soal ${currentQuestionIndex + 1} dari ${quizQuestions.length}`;
+            
+            // Render Teks Pertanyaan (Mendukung teks biasa maupun huruf arab)
+            const questionEl = document.getElementById('question-text');
+            questionEl.innerText = q.question;
+            // Deteksi sederhana jika soal mengandung huruf arab, perbesar font-nya
+            if(/[\u0600-\u06FF]/.test(q.question)) {
+                questionEl.classList.add('arabic-text');
+            } else {
+                questionEl.classList.remove('arabic-text');
+            }
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = ''; 
+
+            // Ekstrak opsi (A,B,C,D) dan hilangkan yang kosong
+            let availableOptions = [];
+            Object.keys(q.options).forEach(key => {
+                if (q.options[key] && q.options[key].trim() !== '') {
+                    availableOptions.push({ key: key, text: q.options[key] });
+                }
+            });
+
+            // Merender tombol untuk setiap pilihan
+            availableOptions.forEach(opt => {
+                const isArabic = /[\u0600-\u06FF]/.test(opt.text);
+                const btn = document.createElement('button');
+                btn.className = "w-full group text-left px-5 py-4 bg-white border-2 border-slate-200 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-all duration-200 flex items-center shadow-sm";
+                
+                btn.innerHTML = `
+                    <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 font-bold group-hover:bg-emerald-500 group-hover:text-white transition-colors mr-4">
+                        ${opt.key}
+                    </div> 
+                    <div class="flex-1 ${isArabic ? 'arabic-text text-right' : 'font-medium text-slate-700'}">
+                        ${opt.text}
+                    </div>
+                `;
+                
+                btn.onclick = () => selectAnswer(opt.key, opt.text, btn, availableOptions);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        // FUNGSI: Evaluasi Jawaban Siswa
+        function selectAnswer(selectedKey, selectedText, btnElement, allOptions) {
+            // Nonaktifkan semua tombol agar tidak bisa diklik dua kali
+            const allBtns = document.getElementById('options-container').querySelectorAll('button');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.remove('hover:border-emerald-500', 'hover:bg-emerald-50', 'group');
+            });
+
+            const q = quizQuestions[currentQuestionIndex];
+            const isCorrect = (selectedKey === q.answer);
+
+            // Temukan teks jawaban yang benar untuk dicatat
+            const correctText = allOptions.find(o => o.key === q.answer)?.text || "(Tidak ada di pilihan)";
+
+            // Efek Visual Benar / Salah
+            const labelDiv = btnElement.querySelector('div:first-child');
+            if (isCorrect) {
+                btnElement.classList.add('border-emerald-500', 'bg-emerald-50');
+                labelDiv.classList.replace('bg-slate-100', 'bg-emerald-500');
+                labelDiv.classList.replace('text-slate-600', 'text-white');
+                correctCount++;
+            } else {
+                btnElement.classList.add('border-rose-500', 'bg-rose-50');
+                labelDiv.classList.replace('bg-slate-100', 'bg-rose-500');
+                labelDiv.classList.replace('text-slate-600', 'text-white');
+                wrongCount++;
+                
+                // Tunjukkan jawaban yang benar
+                allBtns.forEach(b => {
+                    if(b.innerText.startsWith(q.answer)) {
+                        b.classList.add('border-emerald-500', 'bg-emerald-50');
+                        const correctLabel = b.querySelector('div:first-child');
+                        correctLabel.classList.replace('bg-slate-100', 'bg-emerald-500');
+                        correctLabel.classList.replace('text-slate-600', 'text-white');
+                    }
+                });
+            }
+
+            // Catat rekam jejak untuk dikirim ke Google Sheets
+            detailedAnswers.push({
+                soal: q.question,
+                jawaban_siswa: `${selectedKey}. ${selectedText}`,
+                kunci: `${q.answer}. ${correctText}`,
+                status: isCorrect ? "BENAR" : "SALAH"
+            });
+
+            // Jeda 1.2 detik sebelum pindah soal agar siswa bisa melihat mana yang benar
+            setTimeout(() => {
+                if (currentQuestionIndex < quizQuestions.length - 1) {
+                    currentQuestionIndex++;
+                    loadQuestion();
+                } else {
+                    endQuiz();
+                }
+            }, 1200); 
+        }
+
+        // FUNGSI: Kalkulasi Akhir dan Tampilkan Skor
+        function endQuiz() {
+            showSection('section-result');
+            
+            // Rumus Skala 100
+            const maxScore = 100;
+            const finalScore = Math.round((correctCount / quizQuestions.length) * maxScore);
+
+            document.getElementById('result-name').innerText = studentData.name;
+            document.getElementById('result-score').innerText = finalScore;
+            document.getElementById('result-benar').innerText = correctCount;
+            document.getElementById('result-salah').innerText = wrongCount;
+
+            // Trigger penyimpanan ke Spreadsheet
+            saveResultToDatabase(finalScore);
+        }
+
+        // FUNGSI: Request POST ke Google Apps Script
+        async function saveResultToDatabase(finalScore) {
+            const statusDiv = document.getElementById('db-status');
+            
+            // Susun Payload Data
+            const payload = {
+                nama: studentData.name,
+                kelas: studentData.class,
+                benar: correctCount,
+                salah: wrongCount,
+                nilai: finalScore,
+                detail_jawaban: detailedAnswers
+            };
+
+            try {
+                // Mengirim fetch POST
+                // Penting: Menggunakan text/plain untuk bypass preflight CORS Github Pages -> Google Script
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    // Berhasil Disimpan
+                    statusDiv.className = "flex items-center justify-center p-4 mb-6 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold transition-all";
+                    statusDiv.innerHTML = `<svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Data berhasil disimpan ke server Guru!`;
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Error menyalin data DB:', error);
+                // Gagal Menyimpan
+                statusDiv.className = "flex items-center justify-center p-4 mb-6 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm font-semibold transition-all";
+                statusDiv.innerHTML = `<svg class="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Gagal menyimpan. Koneksi internet terputus.`;
+            }
+        }
+    </script>
+</body>
+</html>
